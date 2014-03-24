@@ -12,7 +12,6 @@ session_start();
 $name = strip_tags($_POST['name']);
 $email = strip_tags($_POST['email']);
 $message = strip_tags($_POST['message']);
-$reminders = strip_tags($_POST['reminders']);
 $endDate = strip_tags($_POST['endDate']);
 $amount = strip_tags($_POST['amount']);
 $useReminders = strip_tags($_POST['useReminders']);
@@ -70,7 +69,8 @@ if (!$con)
   else
   {
   //$insertError = mysql_query("INSERT INTO  `slim720_wme`.`selfBet` (  `userKey` ,  `emailaddress` ,  `amount` ,  `endDate` ,  `username` ) VALUES ( 4,  'imanuggo@gmail.com', 80.00,  '2008-11-11 13:23:44',  'Jimmy' )", $con);
-  
+  echo "end date is ";
+  echo $endDate;
   $insertError = mysql_query("INSERT INTO  `slim720_wme`.`selfBet` (
 `emailaddress` ,
 `username` ,

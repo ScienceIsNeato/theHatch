@@ -5,6 +5,7 @@ require_once "Mail.php";
 include('Mail/mime.php');
 include('access.conf');
 
+
 //session_start();
 $errorString = '';
 // Constructing the email
@@ -42,7 +43,8 @@ else
 		remindersRemaining > 0 AND
 		nextReminder < NOW())
 		OR
-		endDate < NOW()"
+		(endDate < NOW() AND 
+		finalNoticeSent IS NULL)"
 		, $con);
 	
 	// Make sure the querry was successful
@@ -56,10 +58,11 @@ else
 	$numReminders = mysql_num_rows($query);
 	if ( 0==$numReminders ) 
 	{
-    	echo 'no records';
+    	//echo 'no records';
 	}
 	else
 	{
+		//echo 'have records';
 		// Go through each row one by one. Extract the email address, username, bet and end date
 		for ($counter = 0; $counter < $numReminders; $counter++)
 		{ 
@@ -72,16 +75,14 @@ else
 			$remindTmpEndDate = $row[4];
 			$remindTmpRemindsRem = $row[6];
 			$remindTmpInterval = $row[7];
-			
+						
 			$now = date('Y-m-d H:i:s'); 
             $nowStr = strtotime($now); 
             $endStr = strtotime($remindTmpEndDate); 
-            
             if ($nowStr >= $endStr)
             {
+            	echo $remindTmpUserName; 
             	// Send final email
-                echo "This one is ready!";
-                echo "<br />";
                 $subject = 'Your bet is complete, '.$name.'! How\'d you do?'; 
                  
                 $userKeyList = $userKeyList .'<br/>Final for key: '. $remindTmpKey .' name: '.$remindTmpUserName.
@@ -99,7 +100,17 @@ else
 				</body>
 				</html>";
 				
-				$text = "Select yes or no.";                              
+				$text = "Select yes or no.";   
+				// COMMENTED OUT FOR EASE OF TESTING
+				$updSuccess = mysql_query("UPDATE `slim720_wme`.`selfBet` 
+				SET finalNoticeSent=1, remindersRemaining = 0
+				WHERE userKey=$remindTmpKey", $con);
+				if (!$updSuccess)
+				{
+				echo 'Could not run query: ' . mysql_error();
+				}
+
+	
             } 
             else 
             {
@@ -107,8 +118,8 @@ else
 				$emailStr = 'Hey'.$remindTmpUserName.', remember your bet for $'. $remindTmpAmount.' that you\'d '.
 				$remindTmpTheBet.' by '. $remindTmpEndDate.'? You\'ll get '.$remindTmpRemindsRem.' more reminders.<br />';
 					
-				echo "$emailStr<br />";
-				echo "\n";
+				//echo "$emailStr<br />";
+				//echo "\n";
 			
 				$userKeyList = $userKeyList .'<br/>Reminder for key: '. $remindTmpKey .' name: '.$remindTmpUserName.
                 ' Amount: '.$remindTmpAmount.' endDate: '.$remindTmpEndDate; 
@@ -124,12 +135,12 @@ else
 				$reminderMinus1 = $remindTmpRemindsRem - 1;
 				
 				// COMMENTED OUT FOR EASE OF TESTING
-				//$updSuccess = mysql_query("UPDATE `slim720_wme`.`selfBet` 
-				//SET remindersRemaining=$reminderMinus1, nextReminder=$nextReminderDate
-				//WHERE userKey=$remindTmpKey", $con);
+				$updSuccess = mysql_query("UPDATE `slim720_wme`.`selfBet` 
+				SET remindersRemaining=$reminderMinus1, nextReminder=$nextReminderDate
+				WHERE userKey=$remindTmpKey", $con);
 				
 				// Craft the email
-				$subject = ''.$name.', here\'s a reminder about your SelfBet due in X days!';
+				$subject = $name.', here\'s a reminder about your SelfBet due in X days!';
 				
 				
 				$html = "Consider yourself reminded";  // HTML version of the email
