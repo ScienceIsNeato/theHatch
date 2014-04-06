@@ -143,9 +143,9 @@ else
 				$subject = $name.', here\'s a reminder about your SelfBet due in X days!';
 				
 				
-				$html = "Consider yourself reminded";  // HTML version of the email
+				$html = $emailStr;  // HTML version of the email
 
-				$text = "Consider yourself reminded";  // HTML version of the email
+				$text = $emailStr;  // HTML version of the email
 
 			}
 			
